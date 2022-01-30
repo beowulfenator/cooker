@@ -52,12 +52,15 @@ int8_t EEMEM temp_corr_default = 0;
 #define LED_DDR       DDRB
 #define LED_GO        PORTB2
 #define LED_TIME      PORTB3
-#define LED_HEAT      PORTB4
 
 // Relay
 #define RELAY_PORT    PORTB
 #define RELAY_DDR     DDRB
 #define RELAY         PORTB0
+
+#define RELAY_ON      RELAY_PORT &= ~_BV(RELAY);
+#define RELAY_OFF     RELAY_PORT |= _BV(RELAY);
+
 
 // Previous state of encoder/key pins to determine
 // which of the pins changed on PCINT
@@ -140,7 +143,6 @@ uint8_t time_display[4] = {0, 0, 0, 0};
 
 uint8_t go_led_on = 0;
 uint8_t time_led_on = 0;
-uint8_t heat_led_on = 0;
 
 //internal temperature buffer, because we don't always
 //show temperature, but need to have it on hand
@@ -336,12 +338,11 @@ void pin_init()
 	SPI_DDR |= _BV(T_CS) | _BV(T_SCK) | _BV(L_CS) | _BV(L_SCK) | _BV(L_MOSI);
 
 	// all LEDs off
-	LED_PORT |= _BV(LED_GO) | _BV(LED_TIME) | _BV(LED_HEAT);
+	LED_PORT |= _BV(LED_GO) | _BV(LED_TIME);
 	// all LEDs are outputs
-	LED_DDR |= _BV(LED_GO) | _BV(LED_TIME) | _BV(LED_HEAT);
+	LED_DDR |= _BV(LED_GO) | _BV(LED_TIME);
 
-	// relay off
-	RELAY_PORT &= ~_BV(RELAY);
+	RELAY_OFF;
 	// relay is output
 	RELAY_DDR |= _BV(RELAY);
 }
@@ -446,12 +447,6 @@ void indicator_update()
 		LED_PORT &= ~_BV(LED_TIME);
 		} else {
 		LED_PORT |= _BV(LED_TIME);
-	}
-
-	if (heat_led_on) {
-		LED_PORT &= ~_BV(LED_HEAT);
-		} else {
-		LED_PORT |= _BV(LED_HEAT);
 	}
 }
 
@@ -614,10 +609,8 @@ void handle_show_current()
 	//all leds off
 	go_led_on = 0;
 	time_led_on = 0;
-	heat_led_on = 0;
 
-	//relay off
-	RELAY_PORT &= ~_BV(RELAY);
+	RELAY_OFF;
 
 	//indicator flashing
 	temp_indicator_flashing = 0;
@@ -661,9 +654,7 @@ void handle_show_current()
 
 		//if under HI, start heating
 		if (temp_degrees <= temp_hi_degrees) {
-			heat_led_on = 1;
-			//relay on
-			RELAY_PORT |= _BV(RELAY);
+			RELAY_ON;
 		}
 		clear_all_flags();
 	}
@@ -674,10 +665,8 @@ void handle_edit_time()
 	//all leds off
 	go_led_on = 0;
 	time_led_on = 0;
-	heat_led_on = 0;
 
-	//relay off
-	RELAY_PORT &= ~_BV(RELAY);
+	RELAY_OFF;
 
 	//indicator flashing
 	temp_indicator_flashing = 0;
@@ -730,10 +719,8 @@ void handle_show_hi()
 	//all leds off
 	go_led_on = 0;
 	time_led_on = 0;
-	heat_led_on = 0;
 
-	//relay off
-	RELAY_PORT &= ~_BV(RELAY);
+	RELAY_OFF;
 
 	//indicator flashing
 	temp_indicator_flashing = 0;
@@ -769,10 +756,8 @@ void handle_edit_hi()
 	//all leds off
 	go_led_on = 0;
 	time_led_on = 0;
-	heat_led_on = 0;
 
-	//relay off
-	RELAY_PORT &= ~_BV(RELAY);
+	RELAY_OFF;
 
 	//indicator flashing
 	temp_indicator_flashing = 1;
@@ -835,10 +820,8 @@ void handle_show_lo()
 	//all leds off
 	go_led_on = 0;
 	time_led_on = 0;
-	heat_led_on = 0;
 
-	//relay off
-	RELAY_PORT &= ~_BV(RELAY);
+	RELAY_OFF;
 
 	//indicator flashing
 	temp_indicator_flashing = 0;
@@ -874,10 +857,8 @@ void handle_edit_lo()
 	//all leds off
 	go_led_on = 0;
 	time_led_on = 0;
-	heat_led_on = 0;
 
-	//relay off
-	RELAY_PORT &= ~_BV(RELAY);
+	RELAY_OFF;
 
 	//indicator flashing
 	temp_indicator_flashing = 1;
@@ -953,16 +934,12 @@ void handle_go(enum go_enum go_state)
 
 	//if over HI, stop heating
 	if (temp_degrees > temp_hi_degrees) {
-		heat_led_on = 0;
-		//relay off
-		RELAY_PORT &= ~_BV(RELAY);
+		RELAY_OFF;
 	}
 
 	//if under LO, start heating
 	if (temp_degrees <= temp_lo_degrees) {
-		heat_led_on = 1;
-		//relay on
-		RELAY_PORT |= _BV(RELAY);
+		RELAY_ON;
 	}
 
 	//indicator flashing
@@ -1062,10 +1039,8 @@ void handle_temp_corr()
 	//all leds off
 	go_led_on = 0;
 	time_led_on = 0;
-	heat_led_on = 0;
 
-	//relay off
-	RELAY_PORT &= ~_BV(RELAY);
+	RELAY_OFF;
 
 	//indicator flashing
 	temp_indicator_flashing = 0;
@@ -1161,9 +1136,6 @@ int main()
 	LED_PORT &= ~_BV(LED_TIME);
 	_delay_ms(500);
 	LED_PORT |= _BV(LED_TIME);
-	LED_PORT &= ~_BV(LED_HEAT);
-	_delay_ms(500);
-	LED_PORT |= _BV(LED_HEAT);
 
 	//by now temperature has likely stabilized
 	read_temperature();
