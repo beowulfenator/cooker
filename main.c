@@ -15,7 +15,7 @@ uint16_t EEMEM temp_lo_default = 30;
 int8_t EEMEM temp_corr_default = 0;
 
 #define HOURS_CAP     6 //maximum hours settable
-#define TEMP_CAP      600
+#define TEMP_CAP      200
 
 // Software SPI
 #define SPI_PORT      PORTD
@@ -36,23 +36,23 @@ int8_t EEMEM temp_corr_default = 0;
 #define ENC_PORT      PORTC
 #define ENC_DDR       DDRC
 #define ENC_PIN       PINC
-#define ENC_A         0
-#define ENC_B         1
-#define ENC_KEY       2
+#define ENC_A         PINC0
+#define ENC_B         PINC1
+#define ENC_KEY       PINC2
 
 // Keys
 #define KEY_PORT      PORTD
 #define KEY_DDR       DDRD
 #define KEY_PIN       PIND
-#define KEY_GO        6
-#define KEY_MODE      7
+#define KEY_GO        PIND6
+#define KEY_MODE      PIND7
 
 // LEDs
 #define LED_PORT      PORTB
 #define LED_DDR       DDRB
-#define LED_GO        PORTC2
-#define LED_TIME      PORTC3
-#define LED_HEAT      PORTC4
+#define LED_GO        PORTB2
+#define LED_TIME      PORTB3
+#define LED_HEAT      PORTB4
 
 // Relay
 #define RELAY_PORT    PORTB
