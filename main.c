@@ -273,10 +273,15 @@ uint16_t temperature_read() {
 void interrupt_init()
 {
 	TCCR1A = 0;
+	
+	// CS = 011 -> CLK/64 (from prescaler)
+	// WGM = 0100 -> CTC/OCR1A mode
 	TCCR1B = _BV(CS11) | _BV(CS10) | _BV(WGM12);
 
 	// F = 5 Hz
-	OCR1A = 0xF424;
+	// for 20MHz clock OCR1A = 0xF424;
+	// for 16MHz clock OCR1A = 0xC350;
+	OCR1A = 0xC350;
 
 	// Timer/Counter0 output compare match A interrupt enable
 	TIMSK1 = _BV(OCIE1A);
